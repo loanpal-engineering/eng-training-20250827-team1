@@ -135,28 +135,18 @@ def register():
         
         # Hash the password
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        # TODO: Figure out why SQLAlchemy is throwing an error and move back to standard SQLAlchemy usage - see below
-        # Have to escape this so that SQLAlchemy doesn't throw an error
-        escaped_password = hashed_password.decode('utf-8').replace("'", "''")
 
-        # Create a new user object
-        # TODO: Figure out why SQLAlchemy is throwing an error and move back to standard SQLAlchemy usage
-        from sqlalchemy import text
-        query_result = None
+        # Create a new user object using SQLAlchemy ORM to prevent SQL injection
         try:
-            sql_query = f"INSERT INTO users (username, password_hash, user_type) VALUES ('{username}', '{escaped_password}', '{role}')"
-            query_result = db.session.execute(text(sql_query))
+            user = User(
+                username=username,
+                password_hash=hashed_password.decode('utf-8'),
+                user_type=role
+            )
+            db.session.add(user)
             db.session.commit()
         except Exception as e:
-            flash("Error creating user: " + str(e) + " - " + str(query_result), "danger")
-            return redirect(url_for('main.register'))
-
-        try:
-            user = User.query.filter_by(username=username).first()
-            if not user:
-                flash("Error creating user: User not found after creation", "danger")
-                return redirect(url_for('main.register'))
-        except Exception as e:
+            db.session.rollback()
             flash("Error creating user: " + str(e), "danger")
             return redirect(url_for('main.register'))
 
