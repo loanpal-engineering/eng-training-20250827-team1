@@ -9,7 +9,7 @@ class MortgageQuote(db.Model):
     property_value = db.Column(db.Numeric(15,2), nullable=False)
     credit_score = db.Column(db.Integer, nullable=False)
     down_payment = db.Column(db.Numeric(15,2), nullable=False)
-    ssn_number = db.Column(db.String(11), nullable=False)
+    ssn_number = db.Column(db.String(255), nullable=False)
     loan_amount = db.Column(db.Numeric(15,2), nullable=False)
     interest_rate = db.Column(db.Numeric(5,2), nullable=False)
     term_years = db.Column(db.Integer, nullable=False)

@@ -10,6 +10,8 @@ services:
       - MYSQL_DB=${MYSQL_DATABASE}
       - TEAM_NUMBER=${TEAM_NUMBER}
       - MYSQL_SSL_MODE=${MYSQL_SSL_MODE}
+      - DATABASE_PASSWORD=${MYSQL_PASSWORD}
+      - SSN_ENCRYPTION_KEY=${SSN_ENCRYPTION_KEY}
     ports:
       - "9000:5555"
     depends_on:

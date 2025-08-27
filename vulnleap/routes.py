@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from vulnleap.models.mortgage_quote import MortgageQuote
 from vulnleap.models import db, User, Session, OrgLevelSetting
+from vulnleap.crypto import ssn_encryptor
 import bcrypt
 import random
 import uuid
@@ -94,11 +95,14 @@ def quote():
         if 'user_id' in session and session['user_id'] is not None:
             user_id = session['user_id']
 
+        # Encrypt SSN before storing
+        encrypted_ssn = ssn_encryptor.encrypt_ssn(ssn_number)
+        
         # Make a new quote object
         if user_id is not None:
-            quote = MortgageQuote(property_value=home_cost, credit_score=credit_score, down_payment=down_payment, loan_amount=final_loan_amount, interest_rate=final_interest_rate, term_years=loan_term, monthly_payment=monthly_payment, status='quote', user_id=user_id, total_interest=total_interest, ssn_number=ssn_number)
+            quote = MortgageQuote(property_value=home_cost, credit_score=credit_score, down_payment=down_payment, loan_amount=final_loan_amount, interest_rate=final_interest_rate, term_years=loan_term, monthly_payment=monthly_payment, status='quote', user_id=user_id, total_interest=total_interest, ssn_number=encrypted_ssn)
         else:
-            quote = MortgageQuote(property_value=home_cost, credit_score=credit_score, down_payment=down_payment, loan_amount=final_loan_amount, interest_rate=final_interest_rate, term_years=loan_term, monthly_payment=monthly_payment, status='quote', total_interest=total_interest, ssn_number=ssn_number)
+            quote = MortgageQuote(property_value=home_cost, credit_score=credit_score, down_payment=down_payment, loan_amount=final_loan_amount, interest_rate=final_interest_rate, term_years=loan_term, monthly_payment=monthly_payment, status='quote', total_interest=total_interest, ssn_number=encrypted_ssn)
         db.session.add(quote)
         db.session.commit()
 
@@ -248,7 +252,16 @@ def quote_page(quote_id):
     if not quote:
         flash("Quote not found.", "danger")
         return redirect(url_for('main.user'))
-    return render_template('existing_quote.html', quote=quote)
+    
+    # Decrypt SSN for display (but mask it)
+    decrypted_ssn = ssn_encryptor.decrypt_ssn(quote.ssn_number)
+    if decrypted_ssn and len(decrypted_ssn) >= 4:
+        # Mask all but last 4 digits
+        masked_ssn = '*' * (len(decrypted_ssn) - 4) + decrypted_ssn[-4:]
+    else:
+        masked_ssn = '****'
+    
+    return render_template('existing_quote.html', quote=quote, masked_ssn=masked_ssn)
 
 @main.route('/admin')
 def admin():

@@ -19,7 +19,7 @@ CREATE TABLE mortgage_quotes (
     property_value DECIMAL(15,2) NOT NULL,
     credit_score INT NOT NULL,
     down_payment DECIMAL(15,2) NOT NULL,
-    ssn_number VARCHAR(50) NOT NULL,
+    ssn_number VARCHAR(255) NOT NULL,
     loan_amount DECIMAL(15,2) NOT NULL,
     interest_rate DECIMAL(5,2) NOT NULL,
     term_years INT NOT NULL,
