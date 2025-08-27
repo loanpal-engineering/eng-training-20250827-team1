@@ -5,11 +5,11 @@ services:
       dockerfile: vulnleap/Dockerfile
     environment:
       - MYSQL_HOST=db_instance
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_DB=webappdb
-      - TEAM_NUMBER=1
-      - MYSQL_SSL_MODE=DISABLED
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DB=${MYSQL_DATABASE}
+      - TEAM_NUMBER=${TEAM_NUMBER}
+      - MYSQL_SSL_MODE=${MYSQL_SSL_MODE}
     ports:
       - "9000:5555"
     depends_on:
@@ -18,10 +18,10 @@ services:
   db_instance:
     image: mariadb:10.5
     environment:
-      - MYSQL_ROOT_PASSWORD=supersecretpassword
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_DATABASE=webappdb
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     volumes:
       - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data_instance:/var/lib/mysql
